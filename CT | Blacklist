@@ -1,0 +1,56 @@
+--// CARBON TECHNOLOGIES LLC \\--
+
+
+--// Instructions
+
+--// Make sure HttpService is enabled, or it won't work. \\--
+--// This script must be in ServerScriptService to function. \\--
+
+--//SETTINGS\\-- 
+
+--(Incase you want to edit this and use it for your own stuff)
+
+trelloID = "K8P1BcA3" -- Trello Board Link
+listname = "Blacklist" -- Trello Board List Name
+
+--// Do not edit anything below here at all! \\--
+HttpServ = game:service('HttpService')
+GAsync = HttpServ:GetAsync('https://api.trello.com/boards/'.. trelloID ..'/lists',true)
+Info = HttpServ:JSONDecode(GAsync)
+Blacklist = {}
+
+function UpdateTrello()
+	Blacklist = {}
+	for i,v in pairs(Info) do
+		if v.name:find(listname) then
+			local GetTable = HttpServ:GetAsync('https://api.trello.com/lists/'..v.id..'/cards',true)
+			local Table = HttpServ:JSONDecode(GetTable)
+			for j,b in pairs (Table) do
+				table.insert(Blacklist,b.name)
+			end
+		end
+	end
+	for i,j in pairs (game.Players:GetChildren()) do
+		for i,r in pairs (Blacklist) do
+			if j.Name:lower() == r:lower() then
+				j:Kick()
+			end
+		end
+	end
+end
+
+game.Players.PlayerAdded:connect(function(Player)
+	for i,v in pairs (Blacklist) do
+		if Player.Name:lower() == v:lower() then
+			Player:Kick()
+		end
+	end
+end)
+
+UpdateTrello() while wait(300) do UpdateTrello() end --wait(300) seconds before it gets the latest list
+--[[
+    
+    GLORY TO THE SWISS EMPIRE    
+    
+    -ClanDominus/Vestrahorn
+--]]
